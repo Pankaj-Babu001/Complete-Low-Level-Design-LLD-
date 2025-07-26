@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Game with AI Coach</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            touch-action: manipulation;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated Background Themes */
+        .bg-animated {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            transition: all 0.5s ease;
+        }
+
+        /* Theme 1: Geometric Patterns */
+        .theme-geometric {
+            background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
+
+        .theme-geometric::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background-image:
+                radial-gradient(circle at 25% 25%, rgba(255, 255, 255, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 75% 75%, rgba(255, 255, 255, 0.1) 0%, transparent 20%);
+            animation: float 20s ease-in-out infinite;
+        }
+
+        /* Theme 2: Floating Particles */
+        .theme-particles {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            overflow: hidden;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: particleFloat 15s linear infinite;
+        }
+
+        /* Theme 3: Waves */
+        .theme-waves {
+            background: linear-gradient(45deg, #2196F3, #21CBF3);
+            overflow: hidden;
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100px;
+            background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1200 120' preserveAspectRatio='none'%3E%3Cpath d='M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z' opacity='.25' fill='%23ffffff'%3E%3C/path%3E%3Cpath d='M0,0V15.81C13,36.92,27.64,56.86,47.69,72.05,99.41,111.27,165,111,224.58,91.58c31.15-10.15,60.09-26.07,89.67-39.8,40.92-19,84.73-46,130.83-49.67,36.26-2.85,70.9,9.42,98.6,31.56,31.77,25.39,62.32,62,103.63,73,40.44,10.79,81.35-6.69,119.13-24.28s75.16-39,116.92-43.05c59.73-5.85,113.28,22.88,168.9,38.84,30.2,8.66,59,6.17,87.09-7.5,22.43-10.89,48-26.93,60.65-49.24V0Z' opacity='.5' fill='%23ffffff'%3E%3C/path%3E%3Cpath d='M0,0V5.63C149.93,59,314.09,71.32,475.83,42.57c43-7.64,84.23-20.12,127.61-26.46,59-8.63,112.48,12.24,165.56,35.4C827.93,77.22,886,95.24,951.2,90c86.53-7,172.46-45.71,248.8-84.81V0Z' fill='%23ffffff'%3E%3C/path%3E%3C/svg%3E");
+            animation: waveMove 10s ease-in-out infinite;
+            opacity: 0.3;
+        }
+
+        /* Theme 4: Matrix Rain */
+        .theme-matrix {
+            background: linear-gradient(45deg, #0d1117, #1f2937);
+            overflow: hidden;
+        }
+
+        .matrix-rain {
+            position: absolute;
+            top: -100px;
+            color: #00ff00;
+            font-family: 'Courier New', monospace;
+            font-size: 18px;
+            line-height: 1.2;
+            opacity: 0.7;
+            animation: matrixFall 10s linear infinite;
+        }
+
+        /* Theme 5: Starfield */
+        .theme-stars {
+            background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+            overflow: hidden;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkle 3s ease-in-out infinite alternate;
+        }
+
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: shoot 4s linear infinite;
+        }
+
+        /* Theme 6: Gradient Orbs */
+        .theme-orbs {
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+        }
+
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.2) 0%, transparent 70%);
+            animation: orbFloat 20s ease-in-out infinite;
+        }
+
+        /* Animations */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-20px) rotate(180deg);
+            }
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes waveMove {
+
+            0%,
+            100% {
+                transform: translateX(0px);
+            }
+
+            50% {
+                transform: translateX(-50px);
+            }
+        }
+
+        @keyframes matrixFall {
+            0% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
+        }
+
+        @keyframes twinkle {
+            0% {
+                opacity: 0.3;
+                transform: scale(1);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        @keyframes shoot {
+            0% {
+                transform: translateX(-100px) translateY(0px);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateX(100vw) translateY(100px);
+                opacity: 0;
+            }
+        }
+
+        @keyframes gradientShift {
+            0% {
+                background-position: 0% 50%;
+            }
+
+            50% {
+                background-position: 100% 50%;
+            }
+
+            100% {
+                background-position: 0% 50%;
+            }
+        }
+
+        @keyframes orbFloat {
+
+            0%,
+            100% {
+                transform: translateY(0px) translateX(0px);
+            }
+
+            25% {
+                transform: translateY(-50px) translateX(50px);
+            }
+
+            50% {
+                transform: translateY(0px) translateX(100px);
+            }
+
+            75% {
+                transform: translateY(50px) translateX(50px);
+            }
+        }
+
+        /* Theme selector */
+        .theme-selector {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 12px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .theme-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .theme-btn.active {
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.8);
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 90vw;
+            height: 90vw;
+            max-width: 65vh;
+            max-height: 65vh;
+            border: 2px solid #374151;
+            border-radius: 0.5rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .square {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(1.8rem, 7vw, 3rem);
+            position: relative;
+        }
+
+        .light {
+            background-color: rgba(243, 244, 246, 0.9);
+        }
+
+        .dark {
+            background-color: rgba(107, 114, 128, 0.9);
+        }
+
+        .piece {
+            cursor: pointer;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s ease-in-out;
+        }
+
+        .selected {
+            background-color: rgba(250, 204, 21, 0.8) !important;
+        }
+
+        .possible-move::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 35%;
+            height: 35%;
+            background-color: rgba(52, 211, 153, 0.6);
+            border-radius: 50%;
+        }
+
+        .suggested-move-from {
+            background-color: rgba(59, 130, 246, 0.7) !important;
+        }
+
+        .suggested-move-to {
+            background-color: rgba(99, 102, 241, 0.7) !important;
+        }
+
+        .in-check {
+            background-color: rgba(239, 68, 68, 0.7) !important;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 0.75rem;
+            text-align: center;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border-left-color: #4f46e5;
+            animation: spin 1s ease infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Glass morphism effects */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+        }
+
+        .glass-button {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-200 flex flex-col items-center justify-center min-h-screen p-4">
+    <div id="background-container" class="bg-animated theme-geometric">
+        <div id="particles-container"></div>
+        <div id="waves-container"></div>
+        <div id="matrix-container"></div>
+        <div id="stars-container"></div>
+        <div id="orbs-container"></div>
+    </div>
+
+    <div class="theme-selector">
+        <button class="theme-btn active" data-theme="geometric"
+            style="background: linear-gradient(45deg, #667eea, #764ba2);"></button>
+        <button class="theme-btn" data-theme="particles"
+            style="background: linear-gradient(135deg, #667eea, #764ba2, #f093fb);"></button>
+        <button class="theme-btn" data-theme="waves"
+            style="background: linear-gradient(45deg, #2196F3, #21CBF3);"></button>
+        <button class="theme-btn" data-theme="matrix"
+            style="background: linear-gradient(45deg, #0d1117, #1f2937);"></button>
+        <button class="theme-btn" data-theme="stars"
+            style="background: radial-gradient(ellipse at bottom, #1b2735, #090a0f);"></button>
+        <button class="theme-btn" data-theme="orbs"
+            style="background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);"></button>
+    </div>
+
+    <div id="game-container"
+        class="w-full max-w-4xl mx-auto flex flex-col md:flex-row items-start md:items-center gap-6">
+        <div class="w-full max-w-xl mx-auto flex flex-col items-center">
+            <h1 class="text-3xl md:text-4xl font-bold text-white mb-4" style="text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                Chess Game</h1>
+
+            <div id="info-panel" class="w-full flex justify-between items-center mb-4 px-2">
+                <div id="status-text" class="text-lg font-semibold text-white"
+                    style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">White's Turn</div>
+                <button id="reset-button"
+                    class="px-4 py-2 glass-button font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all duration-200">
+                    New Game
+                </button>
+            </div>
+
+            <div id="board" class="board"></div>
+
+            <div id="captured-pieces-container" class="w-full mt-4 flex justify-between">
+                <div id="white-captured" class="min-h-[40px] flex items-center gap-1 text-2xl"></div>
+                <div id="black-captured" class="min-h-[40px] flex items-center gap-1 text-2xl"></div>
+            </div>
+        </div>
+
+        <div id="ai-coach-panel" class="w-full md:w-80 glass-panel p-4 shadow-lg">
+            <h2 class="text-2xl font-bold text-white mb-4 text-center" style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">
+                AI Coach</h2>
+            <div class="flex flex-col gap-3">
+                <button id="suggest-move-btn"
+                    class="w-full px-4 py-2 glass-button font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all duration-200">
+                    ✨ Suggest Move
+                </button>
+                <button id="analyze-pos-btn"
+                    class="w-full px-4 py-2 glass-button font-semibold rounded-lg shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 transition-all duration-200">
+                    ✨ Analyze Position
+                </button>
+            </div>
+            <div id="coach-corner"
+                class="mt-4 p-3 bg-gray-100 bg-opacity-20 rounded-md min-h-[100px] border border-white border-opacity-20">
+                <h3 class="font-semibold text-white mb-2" style="text-shadow: 0 1px 2px rgba(0,0,0,0.5);">Coach's
+                    Corner:</h3>
+                <div id="coach-output" class="text-gray-100 text-sm">Click a button to get feedback!</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="promotion-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h2 class="text-2xl font-bold mb-4">Promote Pawn</h2>
+            <div id="promotion-choices" class="flex gap-4 text-5xl"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Background Theme Management ---
+        let currentTheme = 'geometric';
+
+        function initializeThemes() {
+            const themeButtons = document.querySelectorAll('.theme-btn');
+            themeButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const theme = btn.dataset.theme;
+                    switchTheme(theme);
+
+                    // Update active button
+                    themeButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                });
+            });
+
+            // Initialize with geometric theme
+            switchTheme('geometric');
+        }
+
+        function switchTheme(theme) {
+            currentTheme = theme;
+            const container = document.getElementById('background-container');
+
+            // Remove all theme classes
+            container.className = 'bg-animated';
+
+            // Clear all containers
+            document.getElementById('particles-container').innerHTML = '';
+            document.getElementById('waves-container').innerHTML = '';
+            document.getElementById('matrix-container').innerHTML = '';
+            document.getElementById('stars-container').innerHTML = '';
+            document.getElementById('orbs-container').innerHTML = '';
+
+            // Add new theme class
+            container.classList.add(`theme-${theme}`);
+
+            // Initialize theme-specific elements
+            switch (theme) {
+                case 'particles':
+                    createParticles();
+                    break;
+                case 'waves':
+                    createWaves();
+                    break;
+                case 'matrix':
+                    createMatrixRain();
+                    break;
+                case 'stars':
+                    createStars();
+                    break;
+                case 'orbs':
+                    createOrbs();
+                    break;
+            }
+        }
+
+        function createParticles() {
+            const container = document.getElementById('particles-container');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        function createWaves() {
+            const container = document.getElementById('waves-container');
+            for (let i = 0; i < 3; i++) {
+                const wave = document.createElement('div');
+                wave.className = 'wave';
+                wave.style.bottom = (i * 30) + 'px';
+                wave.style.animationDelay = (i * 2) + 's';
+                wave.style.opacity = 0.3 - (i * 0.1);
+                container.appendChild(wave);
+            }
+        }
+
+        function createMatrixRain() {
+            const container = document.getElementById('matrix-container');
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+            for (let i = 0; i < 20; i++) {
+                const rain = document.createElement('div');
+                rain.className = 'matrix-rain';
+                rain.style.left = Math.random() * 100 + '%';
+                rain.style.animationDelay = Math.random() * 10 + 's';
+                rain.style.animationDuration = (Math.random() * 5 + 8) + 's';
+
+                let text = '';
+                for (let j = 0; j < 20; j++) {
+                    text += chars[Math.floor(Math.random() * chars.length)] + '<br>';
+                }
+                rain.innerHTML = text;
+
+                container.appendChild(rain);
+            }
+        }
+
+        function createStars() {
+            const container = document.getElementById('stars-container');
+
+            // Regular stars
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(star);
+            }
+
+            // Shooting stars
+            for (let i = 0; i < 5; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.top = Math.random() * 50 + '%';
+                shootingStar.style.animationDelay = Math.random() * 4 + 's';
+                container.appendChild(shootingStar);
+            }
+        }
+
+        function createOrbs() {
+            const container = document.getElementById('orbs-container');
+
+            for (let i = 0; i < 6; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'orb';
+                orb.style.width = (Math.random() * 200 + 100) + 'px';
+                orb.style.height = orb.style.width;
+                orb.style.left = Math.random() * 100 + '%';
+                orb.style.top = Math.random() * 100 + '%';
+                orb.style.animationDelay = Math.random() * 20 + 's';
+                orb.style.animationDuration = (Math.random() * 10 + 15) + 's';
+                container.appendChild(orb);
+            }
+        }
+
+        // --- DOM ELEMENTS ---
+        const boardElement = document.getElementById('board');
+        const statusText = document.getElementById('status-text');
+        const resetButton = document.getElementById('reset-button');
+        const whiteCapturedContainer = document.getElementById('white-captured');
+        const blackCapturedContainer = document.getElementById('black-captured');
+        const promotionModal = document.getElementById('promotion-modal');
+        const promotionChoices = document.getElementById('promotion-choices');
+        const suggestMoveBtn = document.getElementById('suggest-move-btn');
+        const analyzePosBtn = document.getElementById('analyze-pos-btn');
+        const coachOutput = document.getElementById('coach-output');
+
+        // --- GAME STATE & CONSTANTS ---
+        const PieceType = { KING: 'k', QUEEN: 'q', ROOK: 'r', BISHOP: 'b', KNIGHT: 'n', PAWN: 'p' };
+        const Color = { WHITE: 'white', BLACK: 'black' };
+        const pieceSymbols = {
+            [Color.WHITE]: { k: '♔', q: '♕', r: '♖', b: '♗', n: '♘', p: '♙' },
+            [Color.BLACK]: { k: '♚', q: '♛', r: '♜', b: '♝', n: '♞', p: '♟' }
+        };
+
+        let board = [];
+        let currentTurn = Color.WHITE;
+        let selectedSquare = null;
+        let possibleMoves = [];
+        let capturedPieces = { [Color.WHITE]: [], [Color.BLACK]: [] };
+        let kingPositions = {};
+        let isGameOver = false;
+        let isAIThinking = false;
+        let promotionState = null;
+
+        // --- GEMINI API INTEGRATION ---
+        async function callGemini(prompt, jsonSchema) {
+            if (isAIThinking) return;
+            isAIThinking = true;
+            coachOutput.innerHTML = '<div class="flex items-center gap-2 text-white"><div class="spinner"></div><span>Thinking...</span></div>';
+
+            try {
+                // IMPORTANT: Replace with your actual API key
+                const apiKey = "YOUR_API_KEY";
+                if (apiKey === "YOUR_API_KEY") {
+                    coachOutput.textContent = "Please add your API key in the script.";
+                    console.error("API Key is missing.");
+                    isAIThinking = false;
+                    return null;
+                }
+
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        response_mime_type: "application/json",
+                        response_schema: jsonSchema
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorBody = await response.text();
+                    throw new Error(`API call failed with status: ${response.status}. Body: ${errorBody}`);
+                }
+
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    return JSON.parse(text);
+                } else {
+                    throw new Error("Invalid response structure from API.");
+                }
+            } catch (error) {
+                console.error("Gemini API Error:", error);
+                coachOutput.textContent = "Sorry, the AI coach is having a moment. Please try again.";
+                return null;
+            } finally {
+                isAIThinking = false;
+            }
+        }
+
+        function boardToFEN() {
+            let fen = '';
+            for (let r = 0; r < 8; r++) {
+                let empty = 0;
+                for (let c = 0; c < 8; c++) {
+                    const piece = board[r][c];
+                    if (piece) {
+                        if (empty > 0) {
+                            fen += empty;
+                            empty = 0;
+                        }
+                        let char = piece.type;
+                        fen += piece.color === Color.WHITE ? char.toUpperCase() : char;
+                    } else {
+                        empty++;
+                    }
+                }
+                if (empty > 0) fen += empty;
+                if (r < 7) fen += '/';
+            }
+            fen += ` ${currentTurn === Color.WHITE ? 'w' : 'b'}`;
+            fen += ' - - 0 1'; // Simplified FEN
+            return fen;
+        }
+
+        async function getSuggestedMove() {
+            if (isGameOver) return;
+            const fen = boardToFEN();
+            const prompt = `You are a world-class chess grandmaster. Given the following chess position in FEN notation, what is the best move for the current player? Provide the move in long algebraic notation (e.g., e2e4, g1f3).
+            FEN: ${fen}
+            Your response must be a JSON object.`;
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    "move": { "type": "STRING", "description": "The suggested move in long algebraic notation (e.g., e2e4)." },
+                    "explanation": { "type": "STRING", "description": "A brief, one-sentence explanation of the strategy." }
+                },
+                required: ["move", "explanation"]
+            };
+
+            const result = await callGemini(prompt, schema);
+            if (result) {
+                coachOutput.innerHTML = `<p class="font-bold text-white">${result.move}</p><p class="text-gray-200">${result.explanation}</p>`;
+                highlightSuggestedMove(result.move);
+            }
+        }
+
+        async function getAnalysis() {
+            if (isAIThinking) return;
+            const fen = boardToFEN();
+            const prompt = `You are an expert chess commentator. Analyze the position described by this FEN string. Who has the advantage and what are the key strategic ideas for the current player?
+            FEN: ${fen}
+            Your response must be a JSON object.`;
+
+            const schema = {
+                type: "OBJECT",
+                properties: {
+                    "evaluation": { "type": "STRING", "description": "A summary of who is better (e.g., 'White has a slight advantage')." },
+                    "strategy": { "type": "STRING", "description": "A brief explanation of the key strategy for the current player." }
+                },
+                required: ["evaluation", "strategy"]
+            };
+
+            const result = await callGemini(prompt, schema);
+            if (result) {
+                coachOutput.innerHTML = `<p class="font-bold text-white">${result.evaluation}</p><p class="text-gray-200">${result.strategy}</p>`;
+            }
+        }
+
+        // --- GAME LOGIC ---
+
+        function initializeBoard() {
+            board = Array(8).fill(null).map(() => Array(8).fill(null));
+            const setup = [PieceType.ROOK, PieceType.KNIGHT, PieceType.BISHOP, PieceType.QUEEN, PieceType.KING, PieceType.BISHOP, PieceType.KNIGHT, PieceType.ROOK];
+
+            for (let i = 0; i < 8; i++) {
+                board[0][i] = { type: setup[i], color: Color.BLACK };
+                board[1][i] = { type: PieceType.PAWN, color: Color.BLACK };
+                board[6][i] = { type: PieceType.PAWN, color: Color.WHITE };
+                board[7][i] = { type: setup[i], color: Color.WHITE };
+            }
+            kingPositions = {
+                [Color.WHITE]: { r: 7, c: 4 },
+                [Color.BLACK]: { r: 0, c: 4 }
+            };
+        }
+
+        function renderBoard() {
+            boardElement.innerHTML = '';
+            clearHighlights();
+            const kingInCheckPos = isKingInCheck(currentTurn, board) ? kingPositions[currentTurn] : null;
+
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const square = document.createElement('div');
+                    square.classList.add('square', (r + c) % 2 === 0 ? 'light' : 'dark');
+                    square.dataset.r = r;
+                    square.dataset.c = c;
+
+                    const piece = board[r][c];
+                    if (piece) {
+                        const pieceElement = document.createElement('span');
+                        pieceElement.classList.add('piece');
+                        pieceElement.textContent = pieceSymbols[piece.color][piece.type];
+                        square.appendChild(pieceElement);
+                    }
+
+                    if (kingInCheckPos && kingInCheckPos.r === r && kingInCheckPos.c === c) {
+                        square.classList.add('in-check');
+                    }
+
+                    square.addEventListener('click', () => handleSquareClick(r, c));
+                    boardElement.appendChild(square);
+                }
+            }
+            updateStatus();
+            renderCapturedPieces();
+        }
+
+        function handleSquareClick(r, c) {
+            if (isGameOver || isAIThinking) return;
+
+            if (selectedSquare) {
+                const isValidMove = possibleMoves.some(move => move.r === r && move.c === c);
+                if (isValidMove) {
+                    movePiece(selectedSquare.r, selectedSquare.c, r, c);
+                } else {
+                    clearHighlights();
+                    selectedSquare = null;
+                }
+            } else {
+                const piece = board[r][c];
+                if (piece && piece.color === currentTurn) {
+                    selectedSquare = { r, c };
+                    possibleMoves = getValidMoves(r, c);
+                    highlightPossibleMoves();
+                }
+            }
+        }
+
+        function movePiece(fromR, fromC, toR, toC) {
+            const piece = board[fromR][fromC];
+            const captured = board[toR][toC];
+
+            if (captured) {
+                capturedPieces[captured.color].push(captured.type);
+            }
+
+            board[toR][toC] = piece;
+            board[fromR][fromC] = null;
+
+            if (piece.type === PieceType.KING) {
+                kingPositions[piece.color] = { r: toR, c: toC };
+            }
+
+            // Pawn Promotion
+            if (piece.type === PieceType.PAWN && (toR === 0 || toR === 7)) {
+                handlePromotion(toR, toC);
+                return; // Wait for promotion choice
+            }
+
+            switchTurn();
+        }
+
+        function switchTurn() {
+            currentTurn = (currentTurn === Color.WHITE) ? Color.BLACK : Color.WHITE;
+            selectedSquare = null;
+            possibleMoves = [];
+            checkGameState();
+            renderBoard();
+        }
+
+        function checkGameState() {
+            const hasLegalMoves = doAnyPiecesHaveMoves(currentTurn);
+            const inCheck = isKingInCheck(currentTurn, board);
+
+            if (!hasLegalMoves) {
+                isGameOver = true;
+                if (inCheck) {
+                    statusText.textContent = `Checkmate! ${currentTurn === Color.WHITE ? 'Black' : 'White'} wins.`;
+                } else {
+                    statusText.textContent = "Stalemate! It's a draw.";
+                }
+            }
+        }
+
+        function handlePromotion(r, c) {
+            promotionState = { r, c };
+            promotionModal.classList.remove('hidden');
+            promotionChoices.innerHTML = '';
+            const promotionPieces = [PieceType.QUEEN, PieceType.ROOK, PieceType.BISHOP, PieceType.KNIGHT];
+
+            promotionPieces.forEach(type => {
+                const choice = document.createElement('span');
+                choice.classList.add('piece', 'cursor-pointer');
+                choice.textContent = pieceSymbols[currentTurn][type];
+                choice.onclick = () => {
+                    board[r][c] = { type, color: currentTurn };
+                    promotionModal.classList.add('hidden');
+                    promotionState = null;
+                    switchTurn();
+                };
+                promotionChoices.appendChild(choice);
+            });
+        }
+
+        function getValidMoves(r, c) {
+            const pseudoLegalMoves = getPseudoLegalMoves(r, c, board[r][c]);
+            const validMoves = [];
+
+            for (const move of pseudoLegalMoves) {
+                // Simulate move
+                const tempBoard = JSON.parse(JSON.stringify(board));
+                tempBoard[move.r][move.c] = tempBoard[r][c];
+                tempBoard[r][c] = null;
+
+                // Update king position if it moves
+                let tempKingPos = kingPositions;
+                if (tempBoard[move.r][move.c].type === PieceType.KING) {
+                    const newKingPositions = JSON.parse(JSON.stringify(kingPositions));
+                    newKingPositions[currentTurn] = { r: move.r, c: move.c };
+                    tempKingPos = newKingPositions;
+                }
+
+                if (!isKingInCheck(currentTurn, tempBoard, tempKingPos)) {
+                    validMoves.push(move);
+                }
+            }
+            return validMoves;
+        }
+
+        function getPseudoLegalMoves(r, c, piece) {
+            const moves = [];
+            const { type, color } = piece;
+            const dir = color === Color.WHITE ? -1 : 1;
+
+            const addMove = (newR, newC, isAttack = false) => {
+                if (newR >= 0 && newR < 8 && newC >= 0 && newC < 8) {
+                    const target = board[newR][newC];
+                    if (isAttack) {
+                        if (target && target.color !== color) moves.push({ r: newR, c: newC });
+                    } else {
+                        if (!target) moves.push({ r: newR, c: newC });
+                    }
+                }
+            };
+
+            switch (type) {
+                case PieceType.PAWN:
+                    // Forward 1
+                    if (!board[r + dir]?.[c]) addMove(r + dir, c);
+                    // Forward 2 (from start)
+                    if ((color === Color.WHITE && r === 6) || (color === Color.BLACK && r === 1)) {
+                        if (!board[r + dir]?.[c] && !board[r + 2 * dir]?.[c]) addMove(r + 2 * dir, c);
+                    }
+                    // Capture
+                    addMove(r + dir, c - 1, true);
+                    addMove(r + dir, c + 1, true);
+                    break;
+                case PieceType.KNIGHT:
+                    const knightMoves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+                    knightMoves.forEach(([dr, dc]) => {
+                        const target = board[r + dr]?.[c + dc];
+                        if (!target || target.color !== color) addMove(r + dr, c + dc, true);
+                    });
+                    break;
+                case PieceType.KING:
+                    const kingMoves = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
+                    kingMoves.forEach(([dr, dc]) => {
+                        const target = board[r + dr]?.[c + dc];
+                        if (!target || target.color !== color) addMove(r + dr, c + dc, true);
+                    });
+                    break;
+                case PieceType.ROOK:
+                case PieceType.BISHOP:
+                case PieceType.QUEEN:
+                    let directions = [];
+                    if (type === PieceType.ROOK || type === PieceType.QUEEN) directions.push([-1, 0], [1, 0], [0, -1], [0, 1]);
+                    if (type === PieceType.BISHOP || type === PieceType.QUEEN) directions.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
+
+                    directions.forEach(([dr, dc]) => {
+                        for (let i = 1; i < 8; i++) {
+                            const newR = r + i * dr;
+                            const newC = c + i * dc;
+                            if (newR >= 0 && newR < 8 && newC >= 0 && newC < 8) {
+                                const target = board[newR][newC];
+                                if (target) {
+                                    if (target.color !== color) moves.push({ r: newR, c: newC });
+                                    break; // Stop at first piece
+                                } else {
+                                    moves.push({ r: newR, c: newC });
+                                }
+                            } else break; // Off board
+                        }
+                    });
+                    break;
+            }
+            return moves.filter(m => m.r >= 0 && m.r < 8 && m.c >= 0 && m.c < 8);
+        }
+
+        function isKingInCheck(kingColor, currentBoard, currentKingPos = kingPositions) {
+            const kingPos = currentKingPos[kingColor];
+            if (!kingPos) return false;
+
+            const opponentColor = kingColor === Color.WHITE ? Color.BLACK : Color.WHITE;
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = currentBoard[r][c];
+                    if (piece && piece.color === opponentColor) {
+                        const moves = getPseudoLegalMoves(r, c, piece);
+                        if (moves.some(move => move.r === kingPos.r && move.c === kingPos.c)) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        function doAnyPiecesHaveMoves(color) {
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const piece = board[r][c];
+                    if (piece && piece.color === color) {
+                        if (getValidMoves(r, c).length > 0) {
+                            return true;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+        // --- UI & RENDERING ---
+
+        function updateStatus() {
+            if (isGameOver) return;
+            statusText.textContent = `${currentTurn.charAt(0).toUpperCase() + currentTurn.slice(1)}'s Turn`;
+        }
+
+        function renderCapturedPieces() {
+            whiteCapturedContainer.innerHTML = capturedPieces[Color.BLACK].map(p => pieceSymbols[Color.BLACK][p]).join('');
+            blackCapturedContainer.innerHTML = capturedPieces[Color.WHITE].map(p => pieceSymbols[Color.WHITE][p]).join('');
+        }
+
+        function highlightPossibleMoves() {
+            clearHighlights();
+            if (selectedSquare) {
+                document.querySelector(`[data-r='${selectedSquare.r}'][data-c='${selectedSquare.c}']`).classList.add('selected');
+            }
+            possibleMoves.forEach(move => {
+                document.querySelector(`[data-r='${move.r}'][data-c='${move.c}']`).classList.add('possible-move');
+            });
+        }
+
+        function highlightSuggestedMove(move) {
+            clearHighlights();
+            const fromC = move.charCodeAt(0) - 'a'.charCodeAt(0);
+            const fromR = 8 - parseInt(move[1]);
+            const toC = move.charCodeAt(2) - 'a'.charCodeAt(0);
+            const toR = 8 - parseInt(move[3]);
+
+            document.querySelector(`[data-r='${fromR}'][data-c='${fromC}']`).classList.add('suggested-move-from');
+            document.querySelector(`[data-r='${toR}'][data-c='${toC}']`).classList.add('suggested-move-to');
+        }
+
+        function clearHighlights() {
+            document.querySelectorAll('.square').forEach(s => {
+                s.classList.remove('selected', 'possible-move', 'suggested-move-from', 'suggested-move-to');
+            });
+        }
+
+        function initializeGame() {
+            isGameOver = false;
+            currentTurn = Color.WHITE;
+            selectedSquare = null;
+            possibleMoves = [];
+            capturedPieces = { [Color.WHITE]: [], [Color.BLACK]: [] };
+            coachOutput.textContent = "Click a button to get feedback!";
+            initializeBoard();
+            renderBoard();
+        }
+
+        // --- EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeThemes();
+            initializeGame();
+        });
+        resetButton.addEventListener('click', initializeGame);
+        suggestMoveBtn.addEventListener('click', getSuggestedMove);
+        analyzePosBtn.addEventListener('click', getAnalysis);
+
+    </script>
+</body>
+
+</html>
